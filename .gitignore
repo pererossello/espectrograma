@@ -1,0 +1,6 @@
+__pycache__/
+.ipynb.checkpoints/
+figures/
+old_stuff/
+songs/
+bin/
