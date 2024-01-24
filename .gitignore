@@ -2,5 +2,7 @@ __pycache__/
 .ipynb.checkpoints/
 figures/
 old_stuff/
-songs/
+songs_mess/
 bin/
+example_video.py
+example2.ipynb

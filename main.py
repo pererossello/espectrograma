@@ -618,8 +618,6 @@ class Spectrogram():
                     line1.remove()
                     line2.remove()
                     fill.remove()
-                    # ax.collections.remove(line1)
-                    # ax.collections.remove(line2)
                 
                 k += 1
 
