@@ -12,13 +12,12 @@ class Figure:
     def __init__(self, fig_size=540, ratio=16/9, dpi=300,
                  text_color='w',
                  facecolor = 'k',
-                 ts=2, pad=0.2, 
-                 show=True):
+                 ts=2, pad=0.2):
 
         fig_width, fig_height = fig_size / dpi, fig_size * ratio / dpi
         fs = np.sqrt(fig_width * fig_height)
 
-        fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi, layout='none')
+        fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
 
         fig.patch.set_facecolor(facecolor)
 
@@ -41,11 +40,6 @@ class Figure:
         self.ratio = ratio
         self.fig_width = fig_width
         self.fig_height = fig_height
-
-        if show:
-            plt.show()
-        else:
-            plt.close()
 
     def save(self, path, bbox_inches=None, pad_inches=None):
 

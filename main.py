@@ -1,9 +1,7 @@
 import os
-import json
 import copy
 import datetime
 import shutil
-from itertools import islice
 
 import numpy as np
 import matplotlib as mpl
@@ -36,7 +34,7 @@ class Spectrogram():
 
         self.dt = 1.0 / self.sf  # Time step
 
-
+        # frequency range default
         self.fmin = ut.chromatic_scale['C1']
         self.fmax = ut.chromatic_scale['C8']
 
@@ -256,15 +254,10 @@ class Spectrogram():
 
     def plot(self, show=False, savepath=None, bbox_inches='tight'):
 
-
-
         if not self.plot_params_set:
             self.set_plot_params()
-        # check is self.plot_params_set is a class attribute
 
-
-
-        Fig = pu.Figure(fig_size=self.fig_size, ratio=self.ratio, dpi=self.dpi, show=show, facecolor=self.facecolor)
+        Fig = pu.Figure(fig_size=self.fig_size, ratio=self.ratio, dpi=self.dpi, facecolor=self.facecolor)
         ax = Fig.ax
         fs = Fig.fs
         self.fig = Fig.fig
@@ -312,6 +305,8 @@ class Spectrogram():
             lc_2.set_array(self.ff)
             line2 = ax.add_collection(lc_2)
 
+        self.secs = secs
+
         ax.set_ylim(0,self.y_max)
         ax.set_xscale("log", base=2)
 
@@ -319,16 +314,12 @@ class Spectrogram():
         # Setting X ticks
 
         def superscript(note):
-            
             if '#' in note:
                 new_note = note[0] + '$^{{\#}}_{}$'.format(note[-1])
                 return new_note
             else:
                 new_note = note[0] + '$_{}$'.format(note[-1])
                 return new_note
-    
-        
-
 
         if self.xticks_set == False:
             self.set_xticks()
@@ -385,6 +376,7 @@ class Spectrogram():
 
         ax.tick_params(axis='y', which='major', pad=self.ytick_label_pad*fs, size=0)
         
+
         # Setting title
 
         if self.title_set == False:
@@ -407,8 +399,11 @@ class Spectrogram():
                     y=self.title_position[1],
                     x=self.title_position[0])
         
-        self.secs = secs
-        # Saving
+
+        if show:
+            plt.show()
+        else:
+            plt.close()
 
         if savepath is not None:
 
@@ -417,17 +412,13 @@ class Spectrogram():
                 fh = Fig.fig_height
                 fw = Fig.fig_width
 
-                a, b, c = bbox_inches
-
-                # dr_x = 0.05
-                # dr_y = dr_x*self.ratio
-                # x0, y0 = 0.075*fw, 0.02*fh
+                a, b, c, ratio = bbox_inches
 
                 dr_x = c
-                x0, y0 = a*fw, b*fh
+                x0, y0 = a*fw, b*fw*ratio
 
                 x0, x1 = x0, x0 + fw*(dr_x)
-                y0, y1 = y0, y0 + fh*(dr_x)
+                y0, y1 = y0, y0 + fw*(dr_x)*ratio
 
                 Fig.save(savepath, bbox_inches=mpl.transforms.Bbox([[x0, y0], [x1, y1]])                 
                         )
@@ -438,8 +429,6 @@ class Spectrogram():
                         )
 
         self.Fig = Fig
-
-        
 
         self.plot_params_set = False
         self.title_set = False
@@ -456,7 +445,10 @@ class Spectrogram():
 
 
 
-    def plot_frames(self, show=False, savefolder='../figures/', filename='image', bbox_inches='tight', extension='.jpg'):
+    def generate_frames(self, savefolder='../figures/', filename='image', bbox_inches='tight', extension='.jpg', animation_frames=5):
+
+        self.savefolder = savefolder
+        self.animation_frames = animation_frames
 
         if not os.path.exists(savefolder):
             os.makedirs(savefolder)
@@ -466,9 +458,8 @@ class Spectrogram():
 
         if not self.plot_params_set:
             self.set_plot_params()
-        # check is self.plot_params_set is a class attribute
 
-        Fig = pu.Figure(fig_size=self.fig_size, ratio=self.ratio, dpi=self.dpi, show=show, facecolor=self.facecolor)
+        Fig = pu.Figure(fig_size=self.fig_size, ratio=self.ratio, dpi=self.dpi, show=False, facecolor=self.facecolor)
         ax = Fig.ax
         fs = Fig.fs
         self.fig = Fig.fig
@@ -487,11 +478,24 @@ class Spectrogram():
 
         # Setting X ticks
 
+        def superscript(note):
+            
+            if '#' in note:
+                new_note = note[0] + '$^{{\#}}_{}$'.format(note[-1])
+                return new_note
+            else:
+                new_note = note[0] + '$_{}$'.format(note[-1])
+                return new_note
+    
+
+
         if self.xticks_set == False:
             self.set_xticks()
 
         ax.set_xticks(list(self.x_ticks.values())) 
-        ax.set_xticklabels(self.x_ticks,
+        new_labels = [superscript(i) for i in list(self.x_ticks.keys())]
+
+        ax.set_xticklabels(new_labels,
                         fontsize=self.xtick_label_size*fs,
                         alpha=self.xtick_label_alpha, 
                         va='center',
@@ -568,7 +572,8 @@ class Spectrogram():
                     x=self.title_position[0])
 
 
-        J = 5
+        J = animation_frames
+
 
         k = 0
         for i, step in enumerate(steps):
@@ -630,3 +635,16 @@ class Spectrogram():
         self.modify_x = False
         self.modify_y = False
         self.modify_t = False
+
+
+    def frames_to_video(self, audio_delay=10):
+        audio_duration = len(self.audio_data) * self.dt
+        total_frames = self.animation_frames * self.L
+        fps = total_frames/(audio_duration)
+
+        pu.png_to_mp4(self.savefolder, extension='.jpg', fps=fps, title='video')
+
+        path_video = os.path.dirname(os.path.dirname(self.savefolder)) + '/video.mp4'
+        path_output = os.path.dirname(os.path.dirname(self.savefolder)) + '/video_with_audio.mp4'
+
+        pu.add_audio_to_video(path_video, self.path_audio, path_output, audio_delay_ms=audio_delay)
