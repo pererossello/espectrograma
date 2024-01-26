@@ -2,7 +2,7 @@
 
 Convert audio files into aesthetic spectrograms. This tool allows you to generate a single image or a video of the spectrogram being built as the audio plays along.
 
-![Spectrogram Example](figures/Bach_A_minor_1080x720.jpg)
+![Spectrogram Example](example_plot/Bach_A_minor_1080x720.jpg)
 
 ## Structure
 
