@@ -9,7 +9,7 @@ Convert audio files into aesthetic spectrograms. This tool allows you to generat
 - `main.py`: Class with methods to generate the spectrogram.
 - `plot_utils.py`: Utility functions for plotting.
 - `utils.py`: Miscellaneous utility functions.
-- `example.ipynb`: Notebook with various examples.
+- `example.ipynb`: Notebook with various examples for image and video generation. 
 - `example_dimensions_finetune.ipynb`: Specific example for those who want to save the image with a specific ratio and pixel dimensions (e.g., for printing).
 - `data/`: Some data for musical scales.
 - `songs/`: Example songs.
